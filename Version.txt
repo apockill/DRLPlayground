@@ -1,0 +1,8 @@
+Unity Version 2017.3.0f3
+
+OpenCV Version 3.4.0
+
+Python Version 3.5.4
+
+Numpy 1.14.0+mkl
+

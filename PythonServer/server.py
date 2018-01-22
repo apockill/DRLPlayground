@@ -1,68 +1,99 @@
 import socket
-import sys
+import json
 from base64 import b64decode
 
 import cv2
 import numpy as np
 
-
-HOST = 'localhost'  # Symbolic name, meaning all available interfaces
-PORT = 1234  # Arbitrary non-privileged port
-
-soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-print('Socket created')
-
-# Bind socket to local host and port
-try:
-    soc.bind((HOST, PORT))
-except socket.error as msg:
-    print('Bind failed. Error Code : ' + str(msg[0]) + ' Message ' + msg[1])
-    sys.exit()
-
-print('Socket bind complete')
-
-# Start listening on socket
-soc.listen(10)
-print('Socket now listening')
-conn, addr = soc.accept()
-print('Connected with ' + addr[0] + ':' + str(addr[1]))
+WAIT = 0
+UP = 1
+DOWN = 2
+LEFT = 3
+RIGHT = 4
 
 
-
-while 1:
-    # wait to accept a connection - blocking call
-    print('top')
-
-    # Receive the byte size of the incoming image
-    length = conn.recv(1024)
-    length = int(length)
-    # print 'length',length
+class UnityInterface:
 
 
-    k = int(length / 1024)
-    j = length % 1024
+    def __init__(self, host, port):
+        self.host = host
+        self.port = port
+        self.connection = None
 
-    maindata = b''
-    i = 0
-    while i < k:
-        i = i + 1
-        data = conn.recv(1024)
-        maindata = maindata + data
+        self.soc = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._connect()
 
-    if j != 0:
-        data = conn.recv(j)
-        maindata = maindata + data
+    def get_state(self):
+        """ Returns a picture of the current game state, and the current score of the game """
+        data = self._read_message()
+        image = self._decode_image(data["encodedImage"])
+        score = data["gameScore"]
+        return image, score
 
-    print("Before base64 decode", len(maindata))
+    def send_state(self, action):
+        """ Send an action command to the game """
+        self._write_message('{"action":' + str(int(action)) + '}')
 
-    a = b64decode(maindata)
-    nparr = np.fromstring(a, np.uint8)
-    print("NUMPY LEN", len(nparr))
-    img_np = cv2.imdecode(nparr, cv2.IMREAD_ANYDEPTH)
+    def close(self):
+        self.soc.close()
+
+    def _read_message(self):
+        main_data = ''
+        while True:
+            data = self.connection.recv(1024).decode('utf-8')
+
+            if "QUITING!" in data:
+                print("Unity closing! Trying to reconnect...")
+                self.connection.close()
+                self._connect()
+                return self._read_message()
+
+            main_data += data
+            if "}" in data: break
+
+        decoded = json.loads(main_data)
+        return decoded
+
+    def _write_message(self, msg):
+        self.connection.send(bytearray(msg, 'utf-8'))
+
+    def _decode_image(self, base64_img):
+        a = b64decode(base64_img)
+        np_arr = np.fromstring(a, np.uint8)
+        img_np = cv2.imdecode(np_arr, cv2.IMREAD_COLOR)
+        return img_np
+
+    def _connect(self):
+        try:
+            self.soc.bind((self.host, self.port))
+        except socket.error as e:
+            print("Failed to bind to socket. Error: ", e)
+
+        # Start listening on socket
+        self.soc.listen(10)
+        self.connection, addr = self.soc.accept()
+        print("Connected with ", addr)
 
 
-    cv2.imshow("frame", img_np)
-    cv2.waitKey(10000)
-    conn.sendall(bytes("face"))
+if __name__ == "__main__":
+    from time import sleep, time
+    from random import choice
 
-soc.close()
+    client = UnityInterface('localhost', 1234)
+
+    print("Server Started Successfully")
+    last_key = 0
+    while True:
+        image, score = client.get_state()
+        cv2.imshow('BrainServer', image)
+        print(score, image.shape)
+
+        k = cv2.waitKey(1) - 48
+        if k in [UP, DOWN, LEFT, RIGHT, WAIT]:
+            last_key = k
+
+        client.send_state(last_key)  # choice([UP, DOWN, LEFT, RIGHT]))
+
+`
+    client.close()
+
