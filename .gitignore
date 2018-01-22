@@ -35,3 +35,9 @@ sysinfo.txt
 # Builds
 *.apk
 *.unitypackage
+
+# Windows generated files
+desktop.ini
+
+# Pycharm & Rider settings
+.idea
