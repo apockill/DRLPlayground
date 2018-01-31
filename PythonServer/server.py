@@ -28,11 +28,16 @@ class UnityInterface:
         data = self._read_message()
         image = self._decode_image(data["encodedImage"])
         score = data["gameScore"]
-        return image, score
+        is_over = data["gameOver"]
+
+        return is_over, image, score
 
     def send_state(self, action):
         """ Send an action command to the game """
-        self._write_message('{"action":' + str(int(action)) + '}')
+        self._write_message('{"action":' + str(int(action)) + ',"resetGame":false}')
+
+    def reset_game(self):
+        self._write_message('{"action":-1, "resetGame":true}')
 
     def close(self):
         self.soc.close()
@@ -84,16 +89,24 @@ if __name__ == "__main__":
     print("Server Started Successfully")
     last_key = 0
     while True:
-        image, score = client.get_state()
+        is_over, image, score = client.get_state()
+
+        if is_over:
+            print("Game over!")
+            client.reset_game()
+            continue
+
         cv2.imshow('BrainServer', image)
         print(score, image.shape)
 
         k = cv2.waitKey(1) - 48
         if k in [UP, DOWN, LEFT, RIGHT, WAIT]:
             last_key = k
-
+        # if k == WAIT:
+        #     client.reset_game()
+        #     continue
         client.send_state(last_key)  # choice([UP, DOWN, LEFT, RIGHT]))
 
-`
+
     client.close()
 

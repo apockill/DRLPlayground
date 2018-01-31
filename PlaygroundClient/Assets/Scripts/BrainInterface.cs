@@ -11,11 +11,13 @@ public class StateMessage
 {
     public string encodedImage;  // Base64 encoded image of the screen
     public int gameScore;  // The current score of the game
+    public bool gameOver; // Turns True when the game should be reset, or when its been won/lost
 }
 
 public class ControlMessage
 {
     public int action;  // A control command in the form of an integer
+    public bool resetGame; // If true, the game will be reset and the action will be disregarded
 }
 
 
@@ -54,7 +56,8 @@ public class BrainInterface : MonoBehaviour {
         // Create the state message and send it
         var message = new StateMessage();
         message.encodedImage = encodedImage;
-        message.gameScore = gameState.score;
+        message.gameScore = gameState.Score;
+        message.gameOver = gameState.IsOver;
         var json = JsonUtility.ToJson(message);
         WriteMessage(json);
 
@@ -62,6 +65,13 @@ public class BrainInterface : MonoBehaviour {
 
         var read = ReadMessage();
         var msg = JsonUtility.FromJson<ControlMessage>(read);
+
+        // If the game is being reset, reset it then exit early
+        if (msg.resetGame)
+        {
+            gameState.ResetGame();
+            return;
+        }
         
         // Trigger action events here
         OnInputReceived.Invoke(msg.action);

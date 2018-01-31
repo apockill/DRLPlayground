@@ -5,15 +5,12 @@ using UnityEngine;
 public class GameState : MonoBehaviour
 {
 	[HideInInspector]
-	public int score;
-	
-	// Use this for initialization
-	void Start () {
-		
-	}
-	
-	// Update is called once per frame
-	void Update () {
+	public int Score;
+
+	public bool IsOver;
+
+	public void ResetGame()
+	{
 		
 	}
 }

@@ -252,9 +252,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 496008d83fa9d114ba728c4eebee1c19, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: 0
-  NumGoodBalls: 50
-  NumBadBalls: 50
+  Score: 0
+  IsOver: 0
+  NumGoodBalls: 1
+  NumBadBalls: 1
   SpawnRadius: 10
   Reward: 1
   Penalty: -1

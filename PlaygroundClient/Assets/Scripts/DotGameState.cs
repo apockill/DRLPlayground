@@ -1,6 +1,8 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
+using UnityEngine.Analytics;
 
 public class DotGameState : GameState
 {
@@ -21,19 +23,29 @@ public class DotGameState : GameState
 	
 	// Update is called once per frame
 	void Update () {
-		
+		var good =  GameObject.FindGameObjectsWithTag("GoodBall");
+		if (good.Length == 0)
+		{
+			IsOver = true;
+		}
 	}
 
+	public void ResetGame()
+	{
+		ClearBalls();
+		SpawnBalls();
+	}
+	
 	void OnTriggerEnter(Collider col)
 	{
 		if (col.gameObject.name.Contains(gBall.name))
 		{
 			Destroy(col.gameObject);
-			score += Reward;
+			Score += Reward;
 		}
 		if (col.gameObject.name.Contains(bBall.name))
 		{
-			score += Penalty;
+			Score += Penalty;
 			Destroy(col.gameObject);
 		}
 	}
@@ -58,5 +70,15 @@ public class DotGameState : GameState
 		location.y = robot.position.y + .1f;
 		location.z += Random.Range(-SpawnRadius, SpawnRadius);
 		Instantiate(ball, location, Quaternion.identity);
+	}
+
+	void ClearBalls()
+	{
+		var good =  GameObject.FindGameObjectsWithTag("GoodBall");
+		var objects = good.Concat(GameObject.FindGameObjectsWithTag("BadBall"));
+
+		foreach(GameObject obj in objects)
+			Destroy(obj);
+		
 	}
 }

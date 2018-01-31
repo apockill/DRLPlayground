@@ -26,7 +26,7 @@ public class NavigateGameState : GameState {
 		if (IsBadCollision(col))
 		{
 			Debug.Log("Bad collision!");
-			score += CollisionPenalty;
+			Score += CollisionPenalty;
 		}
 			 
 		

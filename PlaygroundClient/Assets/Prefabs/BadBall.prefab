@@ -24,7 +24,7 @@ GameObject:
   - component: {fileID: 23492814096281228}
   m_Layer: 0
   m_Name: BadBall
-  m_TagString: Untagged
+  m_TagString: BadBall
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
