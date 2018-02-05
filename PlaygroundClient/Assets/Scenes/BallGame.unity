@@ -254,8 +254,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   Score: 0
   IsOver: 0
-  NumGoodBalls: 1
-  NumBadBalls: 1
+  NumGoodBalls: 30
+  NumBadBalls: 30
   SpawnRadius: 10
   Reward: 1
   Penalty: -1

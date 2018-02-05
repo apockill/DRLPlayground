@@ -9,8 +9,8 @@ public class GameState : MonoBehaviour
 
 	public bool IsOver;
 
-	public void ResetGame()
+	public virtual void ResetGame()
 	{
-		
+		Debug.Log("Calling incorrect resetgame");
 	}
 }

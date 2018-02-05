@@ -24,16 +24,15 @@ public class DotGameState : GameState
 	// Update is called once per frame
 	void Update () {
 		var good =  GameObject.FindGameObjectsWithTag("GoodBall");
-		if (good.Length == 0)
-		{
-			IsOver = true;
-		}
+		IsOver = good.Length == 0;
 	}
 
-	public void ResetGame()
+	public override void ResetGame()
 	{
+		Debug.Log("Calling correct resetgame");
 		ClearBalls();
 		SpawnBalls();
+		Score = 0;
 	}
 	
 	void OnTriggerEnter(Collider col)

@@ -102,9 +102,7 @@ if __name__ == "__main__":
         k = cv2.waitKey(1) - 48
         if k in [UP, DOWN, LEFT, RIGHT, WAIT]:
             last_key = k
-        # if k == WAIT:
-        #     client.reset_game()
-        #     continue
+
         client.send_state(last_key)  # choice([UP, DOWN, LEFT, RIGHT]))
 
 
