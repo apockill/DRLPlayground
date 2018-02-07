@@ -69,6 +69,7 @@ class UnityInterface:
         return img_np
 
     def _connect(self):
+        print("Connecting to client...")
         try:
             self.soc.bind((self.host, self.port))
         except socket.error as e:

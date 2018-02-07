@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 
-def visualize_grid(generator, output_shape, num_cols=15, batch_size=32):
+def visualize_grid(generator, output_shape, num_cols=15, batch_size=600):
     # display a 2D manifold of the digits
     figure = np.zeros((output_shape[0] * num_cols,
                        output_shape[1] * num_cols,
@@ -35,5 +35,5 @@ def visualize_grid(generator, output_shape, num_cols=15, batch_size=32):
 
 
 if __name__ == "__main__":
-    model = keras.models.load_model("./models/Decoder_ld_2_conv_3_id_128_e_1000.h5")
+    model = keras.models.load_model("./models/Decoder_ld_2_conv_3_id_16_e_5000.h5")
     visualize_grid(model, (32, 32, 3))

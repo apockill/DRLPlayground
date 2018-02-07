@@ -14,16 +14,17 @@ def get_existing_dhashes(img_dir):
     """ Get a list of existing dhashes from the images in that directory """
     dhashes = []
     for img_path in Path(img_dir).glob("*.png"):
-        img = cv2.imread(img_path)
+        img = cv2.imread(str(img_path))
         hash = dhash.dhash_int(Image.fromarray(img), HASH_SIZE)
-        dhashes.append(img)
+        dhashes.append(hash)
+
     return dhashes
 
 
-def record_images(output_dir, client):
+def record_images(output_dir, client, previous_dhashes=None):
     Path(output_dir).mkdir(parents=True, exist_ok=True)
     output_dir = Path(output_dir).resolve()
-    dhashes = get_existing_dhashes(output_dir)
+    dhashes = [] if previous_dhashes is None else previous_dhashes
     last_key = 0
     while True:
         is_over, image, score = client.get_state()
@@ -59,5 +60,6 @@ if __name__ == "__main__":
                         help='The port of the running Unity server')
     args = parser.parse_args()
 
+    dhashes = get_existing_dhashes(args.output_dir)
     interface = UnityInterface(args.hostname, args.port)
-    record_images(args.output_dir, interface)
+    record_images(args.output_dir, interface, previous_dhashes=dhashes)
