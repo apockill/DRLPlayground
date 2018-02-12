@@ -1,11 +1,13 @@
-import keras
+from pathlib import Path
 
+import keras
+import cv2
 import numpy as np
 import matplotlib.pyplot as plt
 from scipy.stats import norm
 
 
-def visualize_grid(generator, output_shape, num_cols=15, batch_size=600):
+def visualize_grid(generator, output_shape, num_cols=15, batch_size=600, save_to=None):
     # display a 2D manifold of the digits
     figure = np.zeros((output_shape[0] * num_cols,
                        output_shape[1] * num_cols,
@@ -28,12 +30,21 @@ def visualize_grid(generator, output_shape, num_cols=15, batch_size=600):
 
             figure[i * output_shape[0]: (i + 1) * output_shape[0],
                    j * output_shape[1]: (j + 1) * output_shape[1]] = img
-
-    plt.figure(figsize=(10, 10))
-    plt.imshow(figure, cmap='Greys_r')
-    plt.show()
-
+    if save_to is None:
+        plt.figure(figsize=(10, 10))
+        plt.imshow(figure, cmap='Greys_r')
+        plt.show()
+    else:
+        figure *= 255
+        figure = figure.astype(dtype=np.uint8)
+        figure = cv2.cvtColor(figure, cv2.COLOR_RGB2BGR)
+        cv2.imwrite(save_to, figure)
 
 if __name__ == "__main__":
-    model = keras.models.load_model("./models/Decoder_ld_2_conv_3_id_16_e_5000.h5")
-    visualize_grid(model, (32, 32, 3))
+
+    for path in Path("./old").resolve().glob("Decoder_*.h5"):
+        pic_path = path.parent / path.name.replace(".h5", ".png")
+
+        if not pic_path.exists():
+            model = keras.models.load_model(str(path))
+            visualize_grid(model, (32, 32, 3), save_to=str(pic_path))

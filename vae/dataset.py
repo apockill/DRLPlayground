@@ -39,7 +39,6 @@ class Dataset:
         return len(self.img_paths)
 
     def load(self):
-
         num_test = len(self) * self.fraction_test
 
         x_test = []
