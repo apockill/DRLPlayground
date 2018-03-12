@@ -9,8 +9,11 @@ public class DotGameState : GameState
 	public int NumGoodBalls = 50;
 	public int NumBadBalls = 50;
 	public int SpawnRadius = 10;
+	public int EndGameRadius = 10;
 	public int Reward = 1;
 	public int Penalty = -1;
+	public Vector3 InitialRobotPos;
+	
 	public Transform robot;
 	public GameObject gBall;
 	public GameObject bBall;
@@ -18,18 +21,27 @@ public class DotGameState : GameState
 	// Use this for initialization
 	void Start ()
 	{
-		 SpawnBalls();
+		InitialRobotPos = robot.position;
+		SpawnBalls();
 	}
 	
 	// Update is called once per frame
 	void Update () {
 		var good =  GameObject.FindGameObjectsWithTag("GoodBall");
-		IsOver = good.Length == 0;
+		
+		// The game ends if the number of good balls is 0, or if the robot is too far from start
+		var dist = Vector3.Distance(InitialRobotPos, robot.position);
+		IsOver = good.Length == 0 || dist > EndGameRadius;
+
+		if (IsOver)
+		{
+			Debug.Log("Ending Game: Dist " + dist + " radius " + SpawnRadius);
+		}
 	}
 
 	public override void ResetGame()
 	{
-		Debug.Log("Calling correct resetgame");
+		robot.position = InitialRobotPos;
 		ClearBalls();
 		SpawnBalls();
 		Score = 0;

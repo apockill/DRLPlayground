@@ -4,11 +4,14 @@ using UnityEngine;
 
 public class Robot : MonoBehaviour
 {
-	public float MaxAcceleration = 3f;
-	public float AccelerationConst = 1f;
+	public float SpeedConst = .5f;
 	public float RotationConst = 180f;
 	
-	private float _acceleration = 0.05f;
+//	public float MaxAcceleration = 3f;
+//	public float AccelerationConst = 1f;
+	
+
+	private float _acceleration = 0.1f;
 	private float _movementSpeed = 0f;
 	private float _rotationSpeed = 0f;
 
@@ -41,39 +44,43 @@ public class Robot : MonoBehaviour
 	    
 	    // Reset variables from the previous command
 	    _rotationSpeed = 0;
+	    _movementSpeed = 0;
 	    
+	    Debug.Log("Action: " + command);
 	    // Perform the command
-	    if (command == 0)
-		    Decelerate();
+//	    if (command == 2)
+//		    _movementSpeed = 0;
 	    if (command == 1)
-		    Accelerate(1);
+		    _movementSpeed = SpeedConst;
+//	    if (command == 2)
+//		    _movementSpeed = -SpeedConst;
 	    if (command == 2)
-		    Accelerate(-1);
+		    _rotationSpeed = RotationConst;
 	    if (command == 3)
-		    TurnLeft();
-	    if (command == 4)
-		    TurnRight();
+		    _rotationSpeed = -RotationConst;
+	    if (command > 4 || command < 1)
+		    Debug.Log("Unknown command sent to Robot! Command: " + command);
 	}
 
-	private void Accelerate(int direction)
-	{
-		// Direction is either 1 or -1
-		_movementSpeed += _acceleration * AccelerationConst * direction;
-	}
-
-	private void Decelerate()
-	{
-		// Slow down
-		if (_movementSpeed > 0){
-			_movementSpeed -= Mathf.Lerp(_acceleration, MaxAcceleration, 0f);
-		}
-		else if (_movementSpeed < 0){
-			_movementSpeed += Mathf.Lerp(_acceleration, -MaxAcceleration, 0f);
-		}
-		else{
-			_movementSpeed = 0;
-		}
-	}
+//	private void Accelerate(int direction)
+//	{
+//		// Direction is either 1 or -1
+//		_movementSpeed += _acceleration * AccelerationConst * direction;
+//	}
+//
+//	private void Decelerate()
+//	{
+//		// Slow down
+//		if (_movementSpeed > 0){
+//			_movementSpeed -= Mathf.Lerp(_acceleration, MaxAcceleration, 0f);
+//		}
+//		else if (_movementSpeed < 0){
+//			_movementSpeed += Mathf.Lerp(_acceleration, -MaxAcceleration, 0f);
+//		}
+//		else{
+//			_movementSpeed = 0;
+//		}
+//	}
 
 	private void TurnRight()
 	{

@@ -11,6 +11,5 @@ public class GameState : MonoBehaviour
 
 	public virtual void ResetGame()
 	{
-		Debug.Log("Calling incorrect resetgame");
 	}
 }

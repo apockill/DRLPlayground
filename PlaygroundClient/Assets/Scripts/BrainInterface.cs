@@ -22,60 +22,58 @@ public class ControlMessage
 
 
 // Create events
-[Serializable]
-public class ControlEvent : UnityEvent <int> { }
-
-// Define the main class
 public class BrainInterface : MonoBehaviour {
 
     // Public
     public string Host = "localhost";
     public int Port = 1234;
-    public int Timeout = 2000;
-    public GameState gameState;
-    
+    public int RenderHeight = 500;
+    public int RenderWidth = 500;
+    public GameState Game;
+     
     // Communication objects
     private TcpClient _mySocket;
     private NetworkStream _theStream;
-    private StreamWriter _theWriter;
-    private StreamReader _theReader;
 
     // Events
     public ControlEvent OnInputReceived;
 
-    public void Start()
+    public void Awake()
     {
         SetupSocket();
+        Screen.SetResolution(RenderWidth, RenderHeight, false, -1);
     }
-
+    
     public void OnPostRender()
     {
  
         var encodedImage = GetFrameEncoded();
 
         // Create the state message and send it
-        var message = new StateMessage();
-        message.encodedImage = encodedImage;
-        message.gameScore = gameState.Score;
-        message.gameOver = gameState.IsOver;
+        var message = new StateMessage
+        {
+            encodedImage = encodedImage,
+            gameScore = Game.Score,
+            gameOver = Game.IsOver
+        };
         var json = JsonUtility.ToJson(message);
+        
         WriteMessage(json);
 
         // Python does machine learning work here
-
         var read = ReadMessage();
         var msg = JsonUtility.FromJson<ControlMessage>(read);
 
         // If the game is being reset, reset it then exit early
         if (msg.resetGame)
         {
-            gameState.ResetGame();
+            GC.Collect();
+            Game.ResetGame();
             return;
         }
         
         // Trigger action events here
         OnInputReceived.Invoke(msg.action);
-
     }
 
     public void OnApplicationQuit()
@@ -83,30 +81,30 @@ public class BrainInterface : MonoBehaviour {
         // Send a message to the server that Unity is cutting out
         WriteMessage("QUITING!");
     }
+    
     private void WriteMessage(string message)
     {
-
-        var k = (message.Length) / 1024;
-        var j = (message.Length) % 1024;
-
-        var i = 0;
-        for (; i < k; i++)
+        
+        var bytes = System.Text.Encoding.UTF8.GetBytes(message);
+        try
         {
-            var temp = message.Substring(i * 1024, 1024);
-            _theWriter.Write(temp);
-            _theWriter.Flush();
+            _theStream.Write(bytes, 0, bytes.Length);
         }
-        var temp2 = message.Substring(i * 1024, j);
-        _theWriter.Write(temp2);
-        _theWriter.Flush();
+        catch (NullReferenceException)
+        {
+            Debug.Log("ERROR! When sending: " + message);
+            Debug.Log("NetworkStream Value: " + _theStream);
+            throw;
+        }
+        _theStream.Flush();
     }
-
+    
     private string ReadMessage()
     {
         var msg = "";
         while (msg.Length == 0 || msg[msg.Length - 1] != '}')
-            msg += (char)_theStream.ReadByte();
-
+            msg += (char) _theStream.ReadByte();
+        _theStream.Flush();
         return msg;
     }
 
@@ -131,12 +129,9 @@ public class BrainInterface : MonoBehaviour {
     {
         try
         {
+            Debug.Log("Setting up socket...");
             _mySocket = new TcpClient(Host, Port);
-
             _theStream = _mySocket.GetStream();
-            _theStream.ReadTimeout = Timeout;
-            _theWriter = new StreamWriter(_theStream);
-            _theReader = new StreamReader(_theStream);
         }
         catch (Exception e)
         {
@@ -144,3 +139,8 @@ public class BrainInterface : MonoBehaviour {
         }
     }
 }
+
+[Serializable]
+public class ControlEvent : UnityEvent <int> { }
+
+// Define the main class
