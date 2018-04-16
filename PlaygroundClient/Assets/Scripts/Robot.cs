@@ -48,17 +48,13 @@ public class Robot : MonoBehaviour
 	    
 	    Debug.Log("Action: " + command);
 	    // Perform the command
-//	    if (command == 2)
-//		    _movementSpeed = 0;
-	    if (command == 1)
+	    if (command == 0)
 		    _movementSpeed = SpeedConst;
-//	    if (command == 2)
-//		    _movementSpeed = -SpeedConst;
-	    if (command == 2)
+	    if (command == 1)
 		    _rotationSpeed = RotationConst;
-	    if (command == 3)
+	    if (command == 2)
 		    _rotationSpeed = -RotationConst;
-	    if (command > 4 || command < 1)
+	    if (command > 2 || command < 0)
 		    Debug.Log("Unknown command sent to Robot! Command: " + command);
 	}
 

@@ -6,5 +6,5 @@ EditorBuildSettings:
   serializedVersion: 2
   m_Scenes:
   - enabled: 1
-    path: Assets/Scenes/BallGame.unity
-    guid: 1fd2f0152c6d56047a05394aa57c6709
+    path: Assets/Scenes/RobotGame.unity
+    guid: e1d5ed9fa3cd8ec4e97b4665e07c4655

@@ -8,5 +8,5 @@ setup(
     author_email='Alex.D.Thiel@gmail.com',
     keywords='sample setuptools development',
     packages=find_packages(exclude=['contrib', 'docs', 'tests', 'tensorflow']),
-    install_requires=[],
+    install_requires=['ujson'],
 )

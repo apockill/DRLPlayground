@@ -2,7 +2,8 @@ import random
 import argparse
 import os.path as osp
 
-import gym
+# import gym
+import unity_server.uarm_gym_env as gym
 import numpy as np
 import tensorflow as tf
 import tensorflow.contrib.layers as layers
@@ -12,18 +13,23 @@ import dqn
 from dqn_utils import *
 from atari_wrappers import *
 
+import unity_server.uarm_gym_env as gym
+
 
 def atari_model(img_in, num_actions, scope, reuse=False):
     # as described in https://storage.googleapis.com/deepmind-data/assets/papers/DeepMindNature14236Paper.pdf
     with tf.variable_scope(scope, reuse=reuse):
         out = img_in
-        print(out)
         with tf.variable_scope("convnet"):
             # original architecture
             out = layers.convolution2d(out, num_outputs=32, kernel_size=8,
                                        stride=4, activation_fn=tf.nn.relu)
             out = layers.convolution2d(out, num_outputs=64, kernel_size=4,
                                        stride=2, activation_fn=tf.nn.relu)
+            out = layers.convolution2d(out, num_outputs=64, kernel_size=3,
+                                       stride=1, activation_fn=tf.nn.relu)
+            out = layers.convolution2d(out, num_outputs=64, kernel_size=3,
+                                       stride=1, activation_fn=tf.nn.relu)
             out = layers.convolution2d(out, num_outputs=64, kernel_size=3,
                                        stride=1, activation_fn=tf.nn.relu)
         out = layers.flatten(out)
@@ -75,8 +81,8 @@ def atari_learn(env, session, num_timesteps):
         session=session,
         exploration=exploration_schedule,
         stopping_criterion=stopping_criterion,
-        replay_buffer_size=1000000,
-        batch_size=32,
+        replay_buffer_size=2000000,
+        batch_size=32*5,
         gamma=0.99,
         learning_starts=50000,
         learning_freq=4,
@@ -136,9 +142,10 @@ def main():
     benchmark = gym.benchmark_spec('Atari40M')
     task = benchmark.tasks[3]
     seed = 1  # Use a seed of zero (you may want to randomize the seed!)
-    env = get_env(task, seed)
 
-    # env = gym.make("Pong-v0")
+
+    # env = get_env(task, seed)
+    env = gym.make()
 
     # Run training
     session = get_session()

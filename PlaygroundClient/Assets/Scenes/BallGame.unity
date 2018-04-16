@@ -253,6 +253,16 @@ Prefab:
       propertyPath: NumGoodBalls
       value: 10000
       objectReference: {fileID: 0}
+    - target: {fileID: 114067253857654614, guid: ded0eb7bf7d94ee4d873e27a2173792e,
+        type: 2}
+      propertyPath: RenderHeight
+      value: 84
+      objectReference: {fileID: 0}
+    - target: {fileID: 114067253857654614, guid: ded0eb7bf7d94ee4d873e27a2173792e,
+        type: 2}
+      propertyPath: RenderWidth
+      value: 84
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_ParentPrefab: {fileID: 100100000, guid: ded0eb7bf7d94ee4d873e27a2173792e, type: 2}
   m_IsPrefabParent: 0

@@ -56,7 +56,7 @@ class UnityALEWrapper(ABC):
 
     def reset_game(self):
         self.server.get_state()
-        self.server.reset_game()
+        self.server.send_reset()
         self.is_game_over = False
         self.latest_total_score = 0
         self.latest_frame_bgr = None

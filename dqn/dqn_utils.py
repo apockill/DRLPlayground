@@ -1,6 +1,6 @@
 """This file includes a collection of utility functions that are useful for
 implementing DQN."""
-import gym
+from run_dqn_atari import gym
 import tensorflow as tf
 import numpy as np
 import random
@@ -163,6 +163,7 @@ def initialize_interdependent_variables(session, vars_list, feed_dict):
 
 def get_wrapper_by_name(env, classname):
     currentenv = env
+
     while True:
         if classname in currentenv.__class__.__name__:
             return currentenv

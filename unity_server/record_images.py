@@ -52,7 +52,7 @@ def record_images(output_dir, client):
 
         if is_over:
             print("Game over!")
-            client.reset_game()
+            client.send_reset()
             continue
 
         cv2.imshow('BrainServer', image)

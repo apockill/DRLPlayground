@@ -94,7 +94,7 @@ def learn(env,
         img_h, img_w, img_c = env.observation_space.shape
         input_shape = (img_h, img_w, frame_history_len * img_c)
     num_actions = env.action_space.n
-    print(env.observation_space.shape)
+
     # Set up Placeholders
     # placeholder for current observation (or state)
     obs_t_ph = tf.placeholder(tf.uint8, [None] + list(input_shape),
@@ -305,7 +305,6 @@ def learn(env,
             """
 
             # YOUR CODE HERE
-
             # Get a training sample for replay
             sample = replay_buffer.sample(batch_size)
             obs_t_batch, act_batch, rew_batch, obs_tp1_batch, done_mask = sample
@@ -334,7 +333,7 @@ def learn(env,
         ### 4. Log progress
         episode_rewards = get_wrapper_by_name(env,
                                               "Monitor").get_episode_rewards()
-        if len(episode_rewards) > 0:
+        if len(episode_rewards) > 100:
             mean_episode_reward = np.mean(episode_rewards[-100:])
         if len(episode_rewards) > 100:
             best_mean_episode_reward = max(best_mean_episode_reward,

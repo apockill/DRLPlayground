@@ -4,33 +4,34 @@ using System.Collections;
 using System.IO;
 using System.Net.Sockets;
 using System;
+using UnityEngine.SceneManagement;
 
 
 // Define classes for encoding and decoding JSONs
 public class StateMessage
 {
-    public string encodedImage;  // Base64 encoded image of the screen
-    public int gameScore;  // The current score of the game
+    public string encodedImage; // Base64 encoded image of the screen
+    public int gameScore; // The current score of the game
     public bool gameOver; // Turns True when the game should be reset, or when its been won/lost
 }
 
 public class ControlMessage
 {
-    public int action;  // A control command in the form of an integer
+    public int action; // A control command in the form of an integer
     public bool resetGame; // If true, the game will be reset and the action will be disregarded
 }
 
 
 // Create events
-public class BrainInterface : MonoBehaviour {
-
+public class BrainInterface : MonoBehaviour
+{
     // Public
     public string Host = "localhost";
     public int Port = 1234;
     public int RenderHeight = 500;
     public int RenderWidth = 500;
     public GameState Game;
-     
+
     // Communication objects
     private TcpClient _mySocket;
     private NetworkStream _theStream;
@@ -42,38 +43,58 @@ public class BrainInterface : MonoBehaviour {
     {
         SetupSocket();
         Screen.SetResolution(RenderWidth, RenderHeight, false, -1);
+        StartCoroutine(SendAndReceive());
     }
-    
-    public void OnPostRender()
+
+//    public void OnPostRender()
+    IEnumerator SendAndReceive()
     {
- 
-        var encodedImage = GetFrameEncoded();
-
-        // Create the state message and send it
-        var message = new StateMessage
-        {
-            encodedImage = encodedImage,
-            gameScore = Game.Score,
-            gameOver = Game.IsOver
-        };
-        var json = JsonUtility.ToJson(message);
+        yield return new WaitForEndOfFrame();
         
-        WriteMessage(json);
-
-        // Python does machine learning work here
-        var read = ReadMessage();
-        var msg = JsonUtility.FromJson<ControlMessage>(read);
-
-        // If the game is being reset, reset it then exit early
-        if (msg.resetGame)
+        while (true)
         {
-            GC.Collect();
-            Game.ResetGame();
-            return;
+            // Python sends a command, which is then invoked
+            var read = ReadMessage();
+            Debug.Log("read" + read);
+            var msg = JsonUtility.FromJson<ControlMessage>(read);
+
+            // If the game is being reset, reset it then exit early
+            if (msg.resetGame)
+            {
+                Game.ResetGame();
+                yield return new WaitForSeconds(.5f);
+                Game.ResetGame();
+            }
+            else
+            {
+                // Trigger action events here
+                OnInputReceived.Invoke(msg.action);
+            }
+            
+            // Wait for the new state
+            yield return new WaitForEndOfFrame();
+            
+            //The new state is encoded, along with the game score and game state information
+            var encodedImage = GetFrameEncoded();
+
+            // Create the state message and send it
+            var message = new StateMessage
+            {
+                encodedImage = encodedImage,
+                gameScore = Game.Score,
+                gameOver = Game.IsOver
+            };
+            var json = JsonUtility.ToJson(message);
+
+            WriteMessage(json);
+//            if (msg.resetGame)
+//            {
+//                _theStream.Close();
+//                _mySocket.Close();
+//                SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+//                yield return null;
+//            }
         }
-        
-        // Trigger action events here
-        OnInputReceived.Invoke(msg.action);
     }
 
     public void OnApplicationQuit()
@@ -81,10 +102,9 @@ public class BrainInterface : MonoBehaviour {
         // Send a message to the server that Unity is cutting out
         WriteMessage("QUITING!");
     }
-    
+
     private void WriteMessage(string message)
     {
-        
         var bytes = System.Text.Encoding.UTF8.GetBytes(message);
         try
         {
@@ -96,9 +116,10 @@ public class BrainInterface : MonoBehaviour {
             Debug.Log("NetworkStream Value: " + _theStream);
             throw;
         }
+
         _theStream.Flush();
     }
-    
+
     private string ReadMessage()
     {
         var msg = "";
@@ -120,7 +141,7 @@ public class BrainInterface : MonoBehaviour {
 
         var bytes = tex.EncodeToPNG();
         var encodedImage = Convert.ToBase64String(bytes);
-
+        Destroy(tex);
         return encodedImage;
     }
 
@@ -141,6 +162,8 @@ public class BrainInterface : MonoBehaviour {
 }
 
 [Serializable]
-public class ControlEvent : UnityEvent <int> { }
+public class ControlEvent : UnityEvent<int>
+{
+}
 
 // Define the main class
