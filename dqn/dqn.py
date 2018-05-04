@@ -142,20 +142,32 @@ def learn(env,
                  reuse=False)
     q_tp1 = q_func(img_in=obs_tp1_float,
                    num_actions=num_actions,
-                   scope="target_q_func_vars",
+                   scope="target_q_func",
                    reuse=False)
     greedy_action_choice = tf.argmax(q_t, axis=1)
+
+
+
 
     # Described in equation (1) of paper
     # The (1.0 - done_mask_ph) means that if done_mask_ph is 1, then the
     # rest of that multiplication won't have an effect. This behaviour is
     # specified in the documentation above.
-    max_reward_tp1 = tf.reduce_max(q_tp1, axis=1)
+    max_act_t = tf.one_hot(tf.argmax(q_t, axis=1),
+                           depth=num_actions,
+                           dtype=tf.float32,
+                           name="max_action_one_hot")
+    max_reward_tp1 = tf.reduce_max(max_act_t * q_tp1, axis=1)
     y_i = rew_t_ph + gamma * max_reward_tp1 * (1.0 - done_mask_ph)
 
+
     # Described in equation (2) of paper
-    onehot_action = tf.one_hot(act_t_ph, num_actions)
-    q_t_act = tf.reduce_sum(q_t * onehot_action, axis=1)
+    onehot_action = tf.one_hot(act_t_ph,
+                               depth=num_actions,
+                               dtype=tf.float32,
+                               name="action_one_hot")
+
+    q_t_act = tf.reduce_sum(onehot_action * q_t, axis=1)
     total_error = tf.losses.mean_squared_error(y_i, q_t_act)
 
     # Get the tensors for q_func and target_q_func, as specified above
@@ -310,10 +322,13 @@ def learn(env,
             obs_t_batch, act_batch, rew_batch, obs_tp1_batch, done_mask = sample
 
             if not model_initialized:
-                feed = {obs_t_ph: obs_t_batch, obs_tp1_ph: obs_tp1_batch}
+                print("Model is ready for training")
+                feed = {obs_t_ph: obs_t_batch,
+                        obs_tp1_ph: obs_tp1_batch}
                 initialize_interdependent_variables(session,
                                                     tf.global_variables(),
                                                     feed_dict=feed)
+                session.run(update_target_fn)
                 model_initialized = True
 
             feed = {obs_t_ph: obs_t_batch,
