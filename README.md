@@ -1,6 +1,4 @@
+# Deep Reinforcement Learning Playground
+A deep reinforcement learning playground with Unity running the game physics, and Python handling the reinforcement learning algorithms.
 
-# Preparing data to train a Variational Auto Encoder
-1. Run python unity_server/record_images.py
-2. Open the Unity minigame you wish to play
-3. Click on the Python window, and play the game using the number keys
-4. Once there's enough data, close Unity and close the python program.
+The Unity server has a script that hosts a server which waits for a python process to connect to it. Once it has connected, it will forward images of the game world (and information about the game state) to the python process, and wait for a response. The python process is expected to respond with some action to perform in the game. Unity will perform this action, and render the next frame.
